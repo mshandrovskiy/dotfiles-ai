@@ -1,4 +1,4 @@
-{ config, pkgs, user, ... }:
+{ config, pkgs, user, treehouse, ... }:
 
 let
   dotfiles = "${config.home.homeDirectory}/.dotfiles";
@@ -18,6 +18,7 @@ in
     neovim
     gh        # github cli
     nodejs    # node, plus the bundled npm and npx
+    treehouse.packages.${pkgs.system}.default  # worktree manager for firstmate crewmates
     # the font everything renders in
     nerd-fonts.hack
   ];
