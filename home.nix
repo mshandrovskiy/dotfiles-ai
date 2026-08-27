@@ -243,4 +243,27 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
   home.file.".config/opencode/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+
+  # npm global tools that aren't in nixpkgs.
+  # Installed to ~/.npm-global (NPM_CONFIG_PREFIX above) so they survive nix store rebuilds.
+  # home.activation runs on every darwin-rebuild switch, npm's idempotent install is safe to re-run.
+  home.activation.npmGlobalTools = config.lib.hm.dag.entryAfter ["writeBoundary"] ''
+    export NPM_CONFIG_PREFIX="$HOME/.npm-global"
+    export PATH="$HOME/.npm-global/bin:$PATH"
+    $DRY_RUN_CMD ${pkgs.nodejs}/bin/npm install -g --prefix "$HOME/.npm-global" \
+      tasks-axi \
+      quota-axi \
+      gh-axi \
+      lavish-axi \
+      chrome-devtools-axi
+  '';
+
+  # no-mistakes: custom binary installer (not on npm).
+  # Installs to ~/.no-mistakes/bin and links to ~/.local/bin.
+  home.activation.noMistakes = config.lib.hm.dag.entryAfter ["writeBoundary"] ''
+    if ! command -v no-mistakes >/dev/null 2>&1; then
+      $DRY_RUN_CMD ${pkgs.curl}/bin/curl -fsSL \
+        https://raw.githubusercontent.com/kunchenguid/no-mistakes/main/docs/install.sh | sh
+    fi
+  '';
 }
